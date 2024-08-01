@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .navbar {
+        transition: transform 0.3s ease;
+    }
+    .navbar-hidden {
+        transform: translateX(-100%);
+    }
+    .content {
+        margin-left: 16rem; /* Adjust this to match the width of the left navbar */
+        transition: margin-left 0.3s ease;
+    }
+    .content-shift {
+        margin-left: 0;
+    }
+</style>
+</head>
+<body class="bg-gray-100">
+    <div id="app"></div>
+<script src="./hr.js"></script>
+</body>
+</html>
