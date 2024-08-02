@@ -42,7 +42,7 @@ const createNavbars = () => {
     `;
 
     const viewContainer = `
-        <div id="view-container" class="p-2 px-10 border-2 border-red-500 h-[90vh]">
+        <div id="view-container" class="p-2 px-10 border-2 border-red-500 h-[90vh] overflow-auto">
             <!-- Dummy views will be injected here -->
         </div>
     `;
@@ -72,10 +72,12 @@ const createView = async (viewId) => {
     const renderCard = async (dpt, storeName) => {
         const storeList = await render_store_list(storeName);
         return `
-            <div class="p-4 bg-white shadow rounded">
-                <h3 class="text-lg font-semibold">${dpt}</h3>
-                <div>${storeList}</div>
-                <button class="bg-blue-500 text-white p-2 px-3 rounded create-button" data-store="${storeName}">New ${dpt} &nbsp <b> + </b> </button>
+            <div class=" bg-white shadow rounded overflow-y-auto h-64 w-[100%]  px-4 flex flex-col justify-start">
+                <div class=" flex justify-between fixed h-20  bg-gray-200  flex-col  w-[27%] p-2 px-4 rounded-md">
+                    <h3 class="text-lg font-semibold">${dpt}</h3>
+                <button class="bg-blue-500 text-white rounded create-button" data-store="${storeName}">New ${dpt} &nbsp <b> + </b> </button>
+                </div>
+                <div class=" mt-24">${storeList}</div>
             </div>
         `;
     };
@@ -96,7 +98,7 @@ const createView = async (viewId) => {
                 } else {
                     const listItems = records.map(record =>
                         `<li class="flex justify-between items-center p-2 border-b">
-                            <span>ID: ${record.id}, Value: ${record.value}</span>
+                            <span>${storeName === 'Registration' ? record.name : record.value}</span>
                             <div>
                                 <button class="edit-button bg-blue-500 text-white p-2 rounded" data-store="${storeName}" data-id="${record.id}">Edit</button>
                                 <button class="delete-button bg-red-500 text-white p-2 rounded ml-2" data-store="${storeName}" data-id="${record.id}">Delete</button>
@@ -158,7 +160,7 @@ const createView = async (viewId) => {
     ).then(results => results.join(''));
 
     const content = `
-        <div class="p-4 h-full bg-white shadow rounded">
+        <div class="p-4 h-full bg-white shadow rounded border-green-400 border-2">
             <div class="grid grid-cols-3 gap-4 mb-4">
                 ${cards_content.map(item => `
                     <div class="bg-gray-200 p-4 rounded shadow">
@@ -167,7 +169,7 @@ const createView = async (viewId) => {
                     </div>
                 `).join('')}
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 ">
                 ${cardsHtml}
             </div>
         </div>
@@ -193,16 +195,201 @@ const createView = async (viewId) => {
 
 
 // CRUD Functions
+// const createItem = async (storeName) => {
+//     console.log("Looking for storeName -> ", storeName)
+//     const db = await initDB();
+//     const transaction = db.transaction(storeName, 'readwrite');
+//     const store = transaction.objectStore(storeName);
+//     const id = Date.now(); // Use a unique ID or other method
+//     const item = { id, value: `${storeName} Item` };
+//     store.put(item);
+//     alert(`${storeName} item created`);
+// };
 const createItem = async (storeName) => {
-    console.log("Looking for storeName -> ", storeName)
+    // Open the form for input
+    openForm(storeName);
+};
+
+
+
+
+const openForm = async (storeName) => {
+    let formHtml = '';
+
+    if (storeName === 'Registration') {
+        const roles = await getOptionsFromStore('Role');
+        const departments = await getOptionsFromStore('Department');
+
+        console.log("roles --> " , roles)
+        console.log("departments --> " , departments)
+
+        formHtml = `
+            <div id="form-container" class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50 overflow-auto">
+                <div class="bg-white p-6 rounded shadow-lg max-h-[90vh] overflow-y-auto">
+                    <h2 class="text-xl mb-4">Create New ${storeName}</h2>
+                    <form id="create-item-form">
+                        <label class="block mb-2">Employee ID:</label>
+                        <input type="text" name="employeeId" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Name:</label>
+                        <input type="text" name="name" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Date of Birth:</label>
+                        <input type="date" name="dob" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Gender:</label>
+                        <select name="gender" class="border p-2 w-full mb-4" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        
+                        <label class="block mb-2">Email:</label>
+                        <input type="email" name="email" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Phone:</label>
+                        <input type="tel" name="phone" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Address:</label>
+                        <input type="text" name="address" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Position/Title:</label>
+                        <input type="text" name="position" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Date of Joining:</label>
+                        <input type="date" name="dateOfJoining" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Salary Details:</label>
+                        <input type="text" name="salary" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Emergency Contact Information:</label>
+                        <input type="text" name="emergencyContact" class="border p-2 w-full mb-4" required />
+                        
+                        <label class="block mb-2">Profile Picture:</label>
+                        <input type="file" name="profilePicture" class="border p-2 w-full mb-4" />
+                        
+                        <label class="block mb-2">Role:</label>
+                        <select name="role" class="border p-2 w-full mb-4" required>
+                            ${roles.map(role => `<option value="${role.id}">${role.value}</option>`).join('')}
+                        </select>
+                        
+                        <label class="block mb-2">Department:</label>
+                        <select name="department" class="border p-2 w-full mb-4" required>
+                            ${departments.map(department => `<option value="${department.id}">${department.value}</option>`).join('')}
+                        </select>
+                        
+                        <button type="submit" class="bg-green-500 text-white p-2 rounded">Save</button>
+                        <button type="button" class="bg-red-500 text-white p-2 rounded ml-2" onclick="closeForm()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        `;
+    } else {
+        formHtml = `
+            <div id="form-container" class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+                <div class="bg-white p-6 rounded shadow-lg">
+                    <h2 class="text-xl mb-4">Create New ${storeName}</h2>
+                    <form id="create-item-form">
+                        <label class="block mb-2">ID:</label>
+                        <input type="text" name="id" class="border p-2 w-full mb-4" required />
+                        <label class="block mb-2">New ${storeName}:</label>
+                        <input type="text" name="value" class="border p-2 w-full mb-4" required />
+                        <button type="submit" class="bg-green-500 text-white p-2 rounded">Save</button>
+                        <button type="button" class="bg-red-500 text-white p-2 rounded ml-2" onclick="closeForm()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    document.body.insertAdjacentHTML('beforeend', formHtml);
+
+    document.getElementById('create-item-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        let data = {};
+
+        if (storeName === 'Registration') {
+            data = {
+                employeeId: formData.get('employeeId'),
+                name: formData.get('name'),
+                dob: formData.get('dob'),
+                gender: formData.get('gender'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                position: formData.get('position'),
+                dateOfJoining: formData.get('dateOfJoining'),
+                salary: formData.get('salary'),
+                emergencyContact: formData.get('emergencyContact'),
+                profilePicture: formData.get('profilePicture') ? formData.get('profilePicture').name : '',
+                role: formData.get('role'),
+                department: formData.get('department')
+            };
+        } else {
+            data = { id: formData.get('id'), value: formData.get('value') };
+        }
+
+        await saveItemToDB(storeName, data);
+        closeForm();
+    });
+};
+
+// Helper function to get options from IndexedDB
+const getOptionsFromStore = async (storeName) => {
+    const db = await initDB();
+    const transaction = db.transaction(storeName);
+    const store = transaction.objectStore(storeName);
+
+    return new Promise((resolve, reject) => {
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+
+        request.onerror = (e) => reject(e);
+    });
+};
+
+
+
+
+
+
+const saveItemToDB = async (storeName, value) => {
     const db = await initDB();
     const transaction = db.transaction(storeName, 'readwrite');
     const store = transaction.objectStore(storeName);
-    const id = Date.now(); // Use a unique ID or other method
-    const item = { id, value: `${storeName} Item` };
-    store.put(item);
-    alert(`${storeName} item created`);
+    // const id = Date.now(); // Use a unique ID or other method
+    console.log("storeName -> ", storeName)
+    console.log("value -> ", value)
+
+    // const item = {  value };
+    // console.log("item -> ", item)
+    store.put(value);
+
+
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = (e) => reject(e);
+        createView(storeName);
+    });
 };
+
+
+
+
+
+const closeForm = () => {
+    const formContainer = document.getElementById('form-container');
+    if (formContainer) {
+        formContainer.remove();
+    }
+};
+
+
+
 
 const readItem = async (storeName) => {
     const db = await initDB();
@@ -235,35 +422,35 @@ const deleteItem = async (storeName) => {
 
 
 // Open form
-const openForm = (formNumber) => {
-    const formHtml = `
-        <div id="form${formNumber}" class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
-            <div class="bg-white p-6 rounded shadow-lg">
-                <h2 class="text-xl mb-4">Form ${formNumber}</h2>
-                <form id="form${formNumber}-form">
-                    <label class="block mb-2">Data:</label>
-                    <input type="text" name="data" class="border p-2 w-full mb-4" required />
-                    <button type="submit" class="bg-green-500 text-white p-2 rounded">Save</button>
-                    <button type="button" class="bg-red-500 text-white p-2 rounded ml-2" onclick="closeForm(${formNumber})">Close</button>
-                </form>
-            </div>
-        </div>
-    `;
+// const openForm = (formNumber) => {
+//     const formHtml = `
+//         <div id="form${formNumber}" class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+//             <div class="bg-white p-6 rounded shadow-lg">
+//                 <h2 class="text-xl mb-4">Form ${formNumber}</h2>
+//                 <form id="form${formNumber}-form">
+//                     <label class="block mb-2">Data:</label>
+//                     <input type="text" name="data" class="border p-2 w-full mb-4" required />
+//                     <button type="submit" class="bg-green-500 text-white p-2 rounded">Save</button>
+//                     <button type="button" class="bg-red-500 text-white p-2 rounded ml-2" onclick="closeForm(${formNumber})">Close</button>
+//                 </form>
+//             </div>
+//         </div>
+//     `;
 
-    document.body.insertAdjacentHTML('beforeend', formHtml);
+//     document.body.insertAdjacentHTML('beforeend', formHtml);
 
-    document.getElementById(`form${formNumber}-form`).addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const data = new FormData(event.target).get('data');
-        await saveDataToDB(data);
-        closeForm(formNumber);
-    });
-};
+//     document.getElementById(`form${formNumber}-form`).addEventListener('submit', async (event) => {
+//         event.preventDefault();
+//         const data = new FormData(event.target).get('data');
+//         await saveDataToDB(data);
+//         closeForm(formNumber);
+//     });
+// };
 
 // Close form
-const closeForm = (formNumber) => {
-    document.getElementById(`form${formNumber}`).remove();
-};
+// const closeForm = (formNumber) => {
+//     document.getElementById(`form${formNumber}`).remove();
+// };
 
 // Save data to IndexedDB
 const saveDataToDB = async (data) => {
